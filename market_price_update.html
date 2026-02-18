@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Price Manager | Kitchen AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dark .glass {
+            background: rgba(17, 24, 39, 0.7);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { primary: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' } }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen transition-colors duration-300">
+
+    <div class="max-w-4xl mx-auto p-4 md:p-8 space-y-6">
+
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center text-white text-xl shadow-lg shadow-primary-600/30">
+                    <i class="fa-solid fa-shop"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold dark:text-white">Market Price Manager</h1>
+                    <p class="text-sm text-gray-500">Update item prices for Smart Kitchen App</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="toggleTheme()"
+                    class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 border dark:border-gray-700 flex items-center justify-center hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-moon dark:text-yellow-400 text-gray-400"></i>
+                </button>
+                <a href="index.html"
+                    class="px-5 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl font-bold text-sm hover:bg-gray-50 transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Back to App
+                </a>
+            </div>
+        </div>
+
+        <!-- Add/Edit Form -->
+        <div class="glass rounded-3xl p-6 shadow-sm">
+            <h2 class="font-bold text-lg mb-4 flex items-center gap-2"><i
+                    class="fa-solid fa-pen-to-square text-primary-500"></i> Update Item</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Item Name</label>
+                    <input id="item-name" list="common-items" type="text" placeholder="e.g. Samba Rice"
+                        class="w-full p-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 outline-none focus:border-primary-500 transition">
+                    <datalist id="common-items">
+                        <!-- Populated by JS -->
+                    </datalist>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">New Price (LKR)</label>
+                    <input id="item-price" type="number" placeholder="0.00"
+                        class="w-full p-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 outline-none focus:border-primary-500 transition font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Unit</label>
+                    <select id="item-unit"
+                        class="w-full p-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700 outline-none focus:border-primary-500 transition">
+                        <option value="kg">kg</option>
+                        <option value="g">g</option>
+                        <option value="l">l</option>
+                        <option value="ml">ml</option>
+                        <option value="pcs">pcs</option>
+                        <option value="pkt">pkt</option>
+                        <option value="tin">tin</option>
+                    </select>
+                </div>
+            </div>
+            <button onclick="addUpdate()"
+                class="mt-4 w-full py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold shadow-lg shadow-primary-600/30 transition transform active:scale-95">
+                <i class="fa-solid fa-plus-circle mr-2"></i> Add to Updates
+            </button>
+        </div>
+
+        <!-- Pending Updates List -->
+        <div class="glass rounded-3xl p-6 shadow-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-bold text-lg flex items-center gap-2"><i
+                        class="fa-solid fa-list-check text-green-500"></i> Pending Updates <span id="count-badge"
+                        class="bg-gray-200 dark:bg-gray-700 text-xs px-2 py-0.5 rounded-full">0</span></h2>
+                <button onclick="clearUpdates()" class="text-xs text-red-500 font-bold hover:underline">Clear
+                    All</button>
+            </div>
+
+            <div id="updates-list" class="space-y-3 min-h-[100px]">
+                <p class="text-center text-gray-400 py-8 italic">No updates added yet.</p>
+            </div>
+
+            <div class="mt-6 pt-6 border-t dark:border-gray-700">
+                <button onclick="saveToSystem()"
+                    class="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold shadow-xl shadow-green-600/20 transition transform hover:translate-y-[-2px]">
+                    <i class="fa-solid fa-floppy-disk mr-2"></i> Save & Apply to App
+                </button>
+                <p class="text-center text-xs text-gray-500 mt-3">Changes will be applied next time you prompt the Item
+                    in the main app.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Init
+        const COMMON_ITEMS = [
+            "Samba Rice", "Nadu Rice", "Basmati Rice", "Red Raw Rice", "Keeri Samba",
+            "Dhal (Mysore)", "Big Onions", "Red Onions", "Garlic", "Potatoes",
+            "White Sugar", "Brown Sugar", "Coconut Oil", "Tea Leaves", "Milk Powder",
+            "Wheat Flour", "Cocnut (Large)", "Egg (White)", "Egg (Red)",
+            "Chicken (Whole)", "Chicken (Breast)", "Fish (Tuna)", "Sprats (Dried)",
+            "Canned Mackerel", "Soya Meat", "Salt", "Chilli Powder", "Curry Powder",
+            "Turmeric", "Pepper Seeds"
+        ];
+
+        // Load existing updates
+        let updates = JSON.parse(localStorage.getItem('market_updates') || '[]');
+
+        function init() {
+            // Theme
+            if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+
+            // Populate Datalist
+            const dl = document.getElementById('common-items');
+            COMMON_ITEMS.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item;
+                dl.appendChild(opt);
+            });
+
+            renderList();
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        function addUpdate() {
+            const name = document.getElementById('item-name').value.trim();
+            const price = parseFloat(document.getElementById('item-price').value);
+            const unit = document.getElementById('item-unit').value;
+
+            if (!name || isNaN(price)) {
+                alert("Please enter a valid Name and Price.");
+                return;
+            }
+
+            // Check existing
+            const existingIdx = updates.findIndex(u => u.n.toLowerCase() === name.toLowerCase());
+            if (existingIdx >= 0) {
+                updates[existingIdx] = { n: name, p: price, u: unit, t: Date.now() };
+            } else {
+                updates.push({ n: name, p: price, u: unit, t: Date.now() });
+            }
+
+            renderList();
+
+            // Clear inputs
+            document.getElementById('item-name').value = '';
+            document.getElementById('item-price').value = '';
+        }
+
+        function removeUpdate(index) {
+            updates.splice(index, 1);
+            renderList();
+        }
+
+        function clearUpdates() {
+            if (confirm("Clear all pending updates?")) {
+                updates = [];
+                renderList();
+            }
+        }
+
+        function renderList() {
+            const el = document.getElementById('updates-list');
+            const count = document.getElementById('count-badge');
+
+            count.innerText = updates.length;
+
+            if (updates.length === 0) {
+                el.innerHTML = '<p class="text-center text-gray-400 py-8 italic">No updates added yet.</p>';
+                return;
+            }
+
+            el.innerHTML = updates.map((u, i) => `
+                <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-3 rounded-xl border dark:border-gray-700 shadow-sm animate-pulse-once">
+                    <div>
+                        <div class="font-bold dark:text-white">${u.n}</div>
+                        <div class="text-xs text-gray-500">${u.u}</div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-right">
+                            <div class="font-bold text-green-600 dark:text-green-400">LKR ${u.p.toFixed(2)}</div>
+                            <div class="text-[10px] text-gray-400">Updated</div>
+                        </div>
+                        <button onclick="removeUpdate(${i})" class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 flex items-center justify-center transition">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            `).reverse().join('');
+        }
+
+        function saveToSystem() {
+            localStorage.setItem('market_updates', JSON.stringify(updates));
+
+            // Visual feedback
+            const btn = document.querySelector('button[onclick="saveToSystem()"]');
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Saved!';
+            btn.classList.add('bg-green-500');
+
+            setTimeout(() => {
+                btn.innerHTML = originalIcon;
+                btn.classList.remove('bg-green-500');
+                if (confirm("Updates saved to System Memory! Return to main app?")) {
+                    window.location.href = 'index.html';
+                }
+            }, 1000);
+        }
+
+        // Run
+        init();
+    </script>
+</body>
+
+</html>
